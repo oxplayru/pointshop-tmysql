@@ -1,12 +1,6 @@
 --[[
 
-	PointShop MySQL Adapter © _Undefined (Adam Burton) 2013
-	7th January 2013
-	
-	License:
-	
-	This software is not under a free-to-use license.
-	Do not share or re-distribute without permission from _Undefined (Adam Burton).
+	PointShop MySQL Adapter by _Undefined
 	
 	Usage:
 	
@@ -20,11 +14,6 @@
 		
 		MAKE SURE YOU ALLOW REMOTE ACCESS TO YOUR DATABASE FROM YOUR GMOD SERVERS IP ADDRESS.
 	
-	Help and Support:
-	
-	Contact _Undefined at http://www.facepunch.com/member.php?u=130371
-		Proof of purchase (PayPal transaction id and email address) will be required.
-	
 ]]--
 
 -- config, change these to match your setup
@@ -32,10 +21,10 @@
 local mysql_hostname = 'localhost' -- Your MySQL server address.
 local mysql_username = 'root' -- Your MySQL username.
 local mysql_password = '' -- Your MySQL password.
-local mysql_database = 'pointshop_pointshop' -- Your MySQL database.
+local mysql_database = 'pointshop' -- Your MySQL database.
 local mysql_port = 3306 -- Your MySQL port. Most likely is 3306.
 
-local sync_delay = 30 -- Number of seconds between servers updating points.
+local sync_delay = 30 -- Number of seconds between this server updating from MySQL.
 
 -- end config, don't change anything below unless you know what you're doing
 
@@ -64,7 +53,7 @@ function db:onConnected()
 end
 
 function db:onConnectionFailed(err)
-	MsgN('PointShop MySQL: Connection Failed: ' .. err)
+	MsgN('PointShop MySQL: Connection Failed, please check your settings: ' .. err)
 end
 
 db:connect()
@@ -176,8 +165,12 @@ end
 -- concommand to sync items and points to MySQL. Any existing data will be lost.
 
 concommand.Add('ps_mysql_sync', function(ply, cmd, args)
-	if not shouldmysql then return end -- check if MySQL is working first!
-	--if IsValid(ply) then return end -- only allowed from server console
+	if not shouldmysql then -- check if MySQL is working first!
+		MgsN('PointShop MySQL: MySQL is not connected, please check your settings!')
+		return
+	end
+	
+	if IsValid(ply) then return end -- only allowed from server console
 	
 	local data = sql.Query("SELECT * FROM playerpdata")
 	
