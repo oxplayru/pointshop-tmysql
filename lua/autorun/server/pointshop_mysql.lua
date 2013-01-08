@@ -1,16 +1,21 @@
 --[[
 
-	PointShop MySQL Adapter by _Undefined
+	PointShop MySQL Adapter © _Undefined 2013
+	
+	License:
+
+		This software is not under a free-to-use license.
+		Do not share or re-distribute without permission from _Undefined (Adam Burton).
 	
 	Usage:
 	
-	First, make sure you have the MySQLOO module installed from:
-		http://www.facepunch.com/showthread.php?t=1220537
-		Installation instructions are in that thread.
+		First, make sure you have the MySQLOO module installed from:
+			http://www.facepunch.com/showthread.php?t=1220537
+			Installation instructions are in that thread.
 	
-	Then configure your MySQL details below and import the tables into your
-		database using the provided sql file. If you do not have a database
-		already set up, do that before importing the file.
+		Then configure your MySQL details below and import the tables into your
+			database using the provided sql file. If you do not have a database
+			already set up, do that before importing the file.
 		
 		MAKE SURE YOU ALLOW REMOTE ACCESS TO YOUR DATABASE FROM YOUR GMOD SERVERS IP ADDRESS.
 	
