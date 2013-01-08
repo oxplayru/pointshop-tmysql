@@ -12,14 +12,13 @@
 	
 	First, make sure you have the MySQLOO module installed from:
 		http://www.facepunch.com/showthread.php?t=1220537
-		Installation instructions are in that thread. Do not ask me for help installing the module.
+		Installation instructions are in that thread.
 	
 	Then configure your MySQL details below and import the tables into your
 		database using the provided sql file. If you do not have a database
-		already set up, do that before importing the file. Do not ask me for help setting up your database.
+		already set up, do that before importing the file.
 		
-		MAKE SURE YOU ALLOW REMOTE ACCESS TO YOUR DATABASE FROM YOUR GMOD SERVERS IP ADDRESS. Again, do not
-		ask me for help enabling remote access.
+		MAKE SURE YOU ALLOW REMOTE ACCESS TO YOUR DATABASE FROM YOUR GMOD SERVERS IP ADDRESS.
 	
 	Help and Support:
 	
