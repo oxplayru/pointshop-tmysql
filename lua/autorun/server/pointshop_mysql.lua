@@ -1,11 +1,6 @@
 --[[
 
-	PointShop MySQL Adapter © _Undefined 2013
-	
-	License:
-
-		This software is not under a free-to-use license.
-		Do not share or re-distribute without permission from _Undefined (Adam Burton).
+	PointShop MySQL Adapter by _Undefined
 	
 	Usage:
 	
