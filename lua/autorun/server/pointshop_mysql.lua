@@ -166,7 +166,7 @@ end
 
 concommand.Add('ps_mysql_sync', function(ply, cmd, args)
 	if not shouldmysql then -- check if MySQL is working first!
-		MgsN('PointShop MySQL: MySQL is not connected, please check your settings!')
+		MsgN('PointShop MySQL: MySQL is not connected, please check your settings!')
 		return
 	end
 	
