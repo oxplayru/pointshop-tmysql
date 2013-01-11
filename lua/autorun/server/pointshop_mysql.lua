@@ -129,7 +129,8 @@ function Player:SetPData(key, value)
 	
 	if key == 'PS_Points' then
 		PS_Points[self:UniqueID()] = value
-		local q = db:query("DELETE FROM `pointshop_points` WHERE `uniqueid` = '" .. self:UniqueID() .. "'")
+		
+		local q = db:query("DELETE FROM `pointshop_points` WHERE `uniqueid` = " .. tonumber(self:UniqueID()))
 		q:start()
 		
 		local q = db:query("INSERT INTO `pointshop_points` VALUES ('" .. self:UniqueID() .. "', '" .. value .. "')")	
@@ -138,7 +139,8 @@ function Player:SetPData(key, value)
 	
 	if key == 'PS_Items' then
 		PS_Items[self:UniqueID()] = value
-		local q = db:query("DELETE FROM `pointshop_items` WHERE `uniqueid` = '" .. self:UniqueID() .. "'")
+		
+		local q = db:query("DELETE FROM `pointshop_items` WHERE `uniqueid` = " .. tonumber(self:UniqueID()))
 		q:start()
 		
 		local q = db:query("INSERT INTO `pointshop_items` VALUES ('" .. self:UniqueID() .. "', '" .. value .. "')")
