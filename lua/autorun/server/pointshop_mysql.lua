@@ -63,7 +63,11 @@ function PS_MySQL_Sync()
 	
 	-- get points
 	
-	local q = db:query("SELECT * FROM `pointshop_points`")
+	local IDs = ""
+	for k,v in pairs(player.GetAll()) do
+	    IDs = IDs .. (#IDs == 0 and "" or ", ") .. "'" .. v:UniqueID() .. "'"
+	end
+	local q = db:query("SELECT * FROM `pointshop_points` WHERE `uniqueid` IN(" .. IDs ..");")
 	
 	function q:onSuccess(data)
 		for _, row in pairs(data) do
@@ -86,7 +90,7 @@ function PS_MySQL_Sync()
 	
 	-- get items
 	
-	local q = db:query("SELECT * FROM `pointshop_items`")
+	local q = db:query("SELECT * FROM `pointshop_items` WHERE `uniqueid` IN(" .. IDs ..");")
 	
 	function q:onSuccess(data)
 		for _, row in pairs(data) do
@@ -128,25 +132,19 @@ function Player:SetPData(key, value)
 	end
 	
 	if key == 'PS_Points' then
-		PS_Points[self:UniqueID()] = value
-		
-		local q = db:query("DELETE FROM `pointshop_points` WHERE `uniqueid` = " .. tonumber(self:UniqueID()))
-		q:start()
-		
-		local q = db:query("INSERT INTO `pointshop_points` VALUES ('" .. self:UniqueID() .. "', '" .. value .. "')")	
-		q:start()
+	    PS_Points[self:UniqueID()] = value
+
+	    local q = db:query("INSERT INTO `pointshop_points` (uniqueid, points) VALUES ('" .. self:UniqueID() .. "', '" .. value .. "') ON DUPLICATE KEY UPDATE points=VALUES(points);")
+	    q:start()
 	end
-	
+		
 	if key == 'PS_Items' then
-		PS_Items[self:UniqueID()] = value
-		
-		local q = db:query("DELETE FROM `pointshop_items` WHERE `uniqueid` = " .. tonumber(self:UniqueID()))
-		q:start()
-		
-		local q = db:query("INSERT INTO `pointshop_items` VALUES ('" .. self:UniqueID() .. "', '" .. value .. "')")
-		q:start()
+	    PS_Items[self:UniqueID()] = value
+
+	    local q = db:query("INSERT INTO `pointshop_items` (uniqueid, items) VALUES ('" .. self:UniqueID() .. "', '" .. value .. "') ON DUPLICATE KEY UPDATE items=VALUES(items);")
+	    q:start()
 	end
-	
+
 	return oldPlayerSetPData(self, key, value) -- Sets PData too as a backup!
 end
 
