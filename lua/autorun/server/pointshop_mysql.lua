@@ -60,6 +60,7 @@ db:connect()
 
 function PS_MySQL_Sync()
 	if not shouldmysql then return end
+	if #player.GetAll() < 1 then return end
 	
 	-- get points
 	
@@ -67,6 +68,7 @@ function PS_MySQL_Sync()
 	for k,v in pairs(player.GetAll()) do
 	    IDs = IDs .. (#IDs == 0 and "" or ", ") .. "'" .. v:UniqueID() .. "'"
 	end
+	
 	local q = db:query("SELECT * FROM `pointshop_points` WHERE `uniqueid` IN(" .. IDs ..");")
 	
 	function q:onSuccess(data)
