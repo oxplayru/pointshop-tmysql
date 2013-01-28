@@ -47,7 +47,7 @@ function db:onConnected()
 	
 	shouldmysql = true
 	
-	PS_MySQL_Sync()
+	PS_MySQL_Sync(true)
 	
 	timer.Create('PS_MySQL_Sync', sync_delay, 0, PS_MySQL_Sync) -- start the timer to update points
 end
@@ -58,18 +58,25 @@ end
 
 db:connect()
 
-function PS_MySQL_Sync()
+function PS_MySQL_Sync(all)
 	if not shouldmysql then return end
-	if #player.GetAll() < 1 then return end
+	if not all and #player.GetAll() < 1 then return end
+	
+	local IDs = ""
+	
+	for k,v in pairs(player.GetAll()) do
+		IDs = IDs .. (#IDs == 0 and "" or ", ") .. "'" .. v:UniqueID() .. "'"
+	end
 	
 	-- get points
 	
-	local IDs = ""
-	for k,v in pairs(player.GetAll()) do
-	    IDs = IDs .. (#IDs == 0 and "" or ", ") .. "'" .. v:UniqueID() .. "'"
-	end
+	local q
 	
-	local q = db:query("SELECT * FROM `pointshop_points` WHERE `uniqueid` IN(" .. IDs ..");")
+	if all then
+		q = db:query("SELECT * FROM `pointshop_points`")
+	else
+		q = db:query("SELECT * FROM `pointshop_points` WHERE `uniqueid` IN (" .. IDs ..")")
+	end
 	
 	function q:onSuccess(data)
 		for _, row in pairs(data) do
@@ -85,14 +92,20 @@ function PS_MySQL_Sync()
 	end
 	
 	function q:onError(err, sql)
-		MsgN('PointShop MySQL: Query Failed: ' .. err .. '(' .. sql .. ')')
+		MsgN('PointShop MySQL: Query Failed: ' .. err .. ' (' .. sql .. ')')
 	end
 	
 	q:start()
 	
 	-- get items
 	
-	local q = db:query("SELECT * FROM `pointshop_items` WHERE `uniqueid` IN(" .. IDs ..");")
+	local q
+	
+	if all then
+		q = db:query("SELECT * FROM `pointshop_points`")
+	else
+		q = db:query("SELECT * FROM `pointshop_items` WHERE `uniqueid` IN (" .. IDs ..")")
+	end	
 	
 	function q:onSuccess(data)
 		for _, row in pairs(data) do
@@ -108,7 +121,7 @@ function PS_MySQL_Sync()
 	end
 	
 	function q:onError(err, sql)
-		MsgN('PointShop MySQL: Query Failed: ' .. err .. '(' .. sql .. ')')
+		MsgN('PointShop MySQL: Query Failed: ' .. err .. ' (' .. sql .. ')')
 	end
 	
 	q:start()
@@ -136,14 +149,14 @@ function Player:SetPData(key, value)
 	if key == 'PS_Points' then
 	    PS_Points[self:UniqueID()] = value
 
-	    local q = db:query("INSERT INTO `pointshop_points` (uniqueid, points) VALUES ('" .. self:UniqueID() .. "', '" .. value .. "') ON DUPLICATE KEY UPDATE points=VALUES(points);")
+	    local q = db:query("INSERT INTO `pointshop_points` (uniqueid, points) VALUES ('" .. self:UniqueID() .. "', '" .. value .. "') ON DUPLICATE KEY UPDATE points = VALUES(points)")
 	    q:start()
 	end
 		
 	if key == 'PS_Items' then
 	    PS_Items[self:UniqueID()] = value
 
-	    local q = db:query("INSERT INTO `pointshop_items` (uniqueid, items) VALUES ('" .. self:UniqueID() .. "', '" .. value .. "') ON DUPLICATE KEY UPDATE items=VALUES(items);")
+	    local q = db:query("INSERT INTO `pointshop_items` (uniqueid, items) VALUES ('" .. self:UniqueID() .. "', '" .. value .. "') ON DUPLICATE KEY UPDATE items = VALUES(items)")
 	    q:start()
 	end
 
