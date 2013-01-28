@@ -102,7 +102,7 @@ function PS_MySQL_Sync(all)
 	local q
 	
 	if all then
-		q = db:query("SELECT * FROM `pointshop_points`")
+		q = db:query("SELECT * FROM `pointshop_items`")
 	else
 		q = db:query("SELECT * FROM `pointshop_items` WHERE `uniqueid` IN (" .. IDs ..")")
 	end	
