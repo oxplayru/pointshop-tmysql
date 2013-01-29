@@ -70,17 +70,17 @@ function PS_MySQL_Sync(all)
 	
 	-- get points
 	
-	local q
+	local points_q
 	
 	if all then
-		q = db:query("SELECT * FROM `pointshop_points`")
+		points_q = db:query("SELECT * FROM `pointshop_points`")
 	else
-		q = db:query("SELECT * FROM `pointshop_points` WHERE `uniqueid` IN (" .. IDs ..")")
+		points_q = db:query("SELECT * FROM `pointshop_points` WHERE `uniqueid` IN (" .. IDs ..")")
 	end
 	
-	function q:onSuccess(data)
+	function points_q:onSuccess(data)
 		for _, row in pairs(data) do
-			PS_Points[tostring(row.uniqueid)] = row.points
+			PS_Points[tostring(row.uniqueid)] = tonumber(row.points)
 			
 			local ply = player.GetByUniqueID(tostring(row.uniqueid))
 			
@@ -91,23 +91,23 @@ function PS_MySQL_Sync(all)
 		end
 	end
 	
-	function q:onError(err, sql)
+	function points_q:onError(err, sql)
 		MsgN('PointShop MySQL: Query Failed: ' .. err .. ' (' .. sql .. ')')
 	end
 	
-	q:start()
+	points_q:start()
 	
 	-- get items
 	
-	local q
+	local items_q
 	
 	if all then
-		q = db:query("SELECT * FROM `pointshop_items`")
+		items_q = db:query("SELECT * FROM `pointshop_items`")
 	else
-		q = db:query("SELECT * FROM `pointshop_items` WHERE `uniqueid` IN (" .. IDs ..")")
+		items_q = db:query("SELECT * FROM `pointshop_items` WHERE `uniqueid` IN (" .. IDs ..")")
 	end	
 	
-	function q:onSuccess(data)
+	function items_q:onSuccess(data)
 		for _, row in pairs(data) do
 			PS_Items[tostring(row.uniqueid)] = row.items
 			
@@ -120,11 +120,11 @@ function PS_MySQL_Sync(all)
 		end
 	end
 	
-	function q:onError(err, sql)
+	function items_q:onError(err, sql)
 		MsgN('PointShop MySQL: Query Failed: ' .. err .. ' (' .. sql .. ')')
 	end
 	
-	q:start()
+	items_q:start()
 	
 	MsgN('PointShop MySQL: Synchronising Points and Items from MySQL!')
 end
@@ -147,17 +147,17 @@ function Player:SetPData(key, value)
 	end
 	
 	if key == 'PS_Points' then
-	    PS_Points[self:UniqueID()] = value
-
-	    local q = db:query("INSERT INTO `pointshop_points` (uniqueid, points) VALUES ('" .. self:UniqueID() .. "', '" .. value .. "') ON DUPLICATE KEY UPDATE points = VALUES(points)")
-	    q:start()
+		PS_Points[self:UniqueID()] = value
+		
+		local q = db:query("INSERT INTO `pointshop_points` (uniqueid, points) VALUES ('" .. self:UniqueID() .. "', '" .. value .. "') ON DUPLICATE KEY UPDATE points = VALUES(points)")
+		q:start()
 	end
 		
 	if key == 'PS_Items' then
-	    PS_Items[self:UniqueID()] = value
-
-	    local q = db:query("INSERT INTO `pointshop_items` (uniqueid, items) VALUES ('" .. self:UniqueID() .. "', '" .. value .. "') ON DUPLICATE KEY UPDATE items = VALUES(items)")
-	    q:start()
+		PS_Items[self:UniqueID()] = value
+		
+		local q = db:query("INSERT INTO `pointshop_items` (uniqueid, items) VALUES ('" .. self:UniqueID() .. "', '" .. value .. "') ON DUPLICATE KEY UPDATE items = VALUES(items)")
+		q:start()
 	end
 
 	return oldPlayerSetPData(self, key, value) -- Sets PData too as a backup!
