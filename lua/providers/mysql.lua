@@ -52,39 +52,56 @@ db:connect()
 PROVIDER.Fallback = 'pdata'
 
 function PROVIDER:GetData(ply, callback)
-	if not shouldmysql then self:GetFallback():GetData(ply, callback) end
-	
-	local q = db:query("SELECT * FROM `pointshop_data` WHERE uniqueid = '" .. ply:UniqueID() .. "'")
-	
-	function q:onSuccess(data)
-		if #data > 0 then
-			local row = data[1]
-		
-			local points = row.points or 0
-			local items = util.JSONToTable(row.items or '{}')
-		
-			callback(points, items)
-		else
-			callback(0, {})
-		end
-	end
-	
-	function q:onError(err, sql)
-		MsgN('PointShop MySQL: Query Failed: ' .. err .. ' (' .. sql .. ')')
-		callback(0, {})
-	end
-	
-	q:start()
+    if not shouldmysql then self:GetFallback():GetData(ply, callback) end
+     
+    local q = db:query("SELECT * FROM `pointshop_data` WHERE uniqueid = '" .. ply:UniqueID() .. "'")
+     
+    function q:onSuccess(data)
+        if #data > 0 then
+            local row = data[1]
+         
+            local points = row.points or 0
+            local items = util.JSONToTable(row.items or '{}')
+ 
+            callback(points, items)
+        else
+            callback(0, {})
+        end
+    end
+     
+    function q:onError(err, sql)
+        if db:status() ~= mysqloo.DATABASE_CONNECTED then
+            db:connect()
+            db:wait()
+        if db:status() ~= mysqloo.DATABASE_CONNECTED then
+            ErrorNoHalt("Re-connection to database server failed.")
+            callback(0, {})
+            return
+            end
+        end
+        MsgN('PointShop MySQL: Query Failed: ' .. err .. ' (' .. sql .. ')')
+        q:start()
+    end
+     
+    q:start()
 end
-
+ 
 function PROVIDER:SetData(ply, points, items)
-	if not shouldmysql then self:GetFallback():SetData(ply, points, items) end
-	
-	local q = db:query("INSERT INTO `pointshop_data` (uniqueid, points, items) VALUES ('" .. ply:UniqueID() .. "', '" .. (points or 0) .. "', '" .. util.TableToJSON(items or {}) .. "') ON DUPLICATE KEY UPDATE points = VALUES(points), items = VALUES(items)")
-	
-	function q:onError(err, sql)
-		MsgN('PointShop MySQL: Query Failed: ' .. err .. ' (' .. sql .. ')')
-	end
-	
-	q:start()
+    if not shouldmysql then self:GetFallback():SetData(ply, points, items) end
+    local q = db:query("INSERT INTO `pointshop_data` (uniqueid, points, items) VALUES ('" .. ply:UniqueID() .. "', '" .. (points or 0) .. "', '" .. util.TableToJSON(items or {}) .. "') ON DUPLICATE KEY UPDATE points = VALUES(points), items = VALUES(items)")
+     
+    function q:onError(err, sql)
+        if db:status() ~= mysqloo.DATABASE_CONNECTED then
+            db:connect()
+            db:wait()
+        if db:status() ~= mysqloo.DATABASE_CONNECTED then
+            ErrorNoHalt("Re-connection to database server failed.")
+            return
+            end
+        end
+        MsgN('PointShop MySQL: Query Failed: ' .. err .. ' (' .. sql .. ')')
+        q:start()
+    end
+     
+    q:start()
 end
