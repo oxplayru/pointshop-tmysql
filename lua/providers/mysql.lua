@@ -34,74 +34,109 @@ local mysql_port = 3306 -- Your MySQL port. Most likely is 3306.
 
 require('mysqloo')
 
+local db
 local shouldmysql = false
 
-local db = mysqloo.connect(mysql_hostname, mysql_username, mysql_password, mysql_database, mysql_port)
+local function ConnectMySQL()
+	db = mysqloo.connect(mysql_hostname, mysql_username, mysql_password, mysql_database, mysql_port)
 
-function db:onConnected()
-	MsgN('PointShop MySQL: Connected!')
-	shouldmysql = true
+	function db:onConnected()
+		MsgN('PointShop MySQL: Connected!')
+		shouldmysql = true
+	end
+
+	function db:onConnectionFailed(err)
+		ErrorNoHalt('PointShop MySQL: Connection Failed, please check your settings: ' .. err)
+	end
+
+	db:connect()
+	db:wait()
+	
+	if db:status() ~= mysqloo.DATABASE_CONNECTED then
+		Error('PointShop MySQL: Couldn\'t connect to server.')
+	end
 end
-
-function db:onConnectionFailed(err)
-	MsgN('PointShop MySQL: Connection Failed, please check your settings: ' .. err)
-end
-
-db:connect()
 
 PROVIDER.Fallback = 'pdata'
 
 function PROVIDER:GetData(ply, callback)
-    if not shouldmysql then self:GetFallback():GetData(ply, callback) end
-     
-    local q = db:query("SELECT * FROM `pointshop_data` WHERE uniqueid = '" .. ply:UniqueID() .. "'")
-     
-    function q:onSuccess(data)
-        if #data > 0 then
-            local row = data[1]
-         
-            local points = row.points or 0
-            local items = util.JSONToTable(row.items or '{}')
+	if not shouldmysql then self:GetFallback():GetData(ply, callback) end
+	 
+	local q = db:query("SELECT * FROM `pointshop_data` WHERE uniqueid = '" .. ply:UniqueID() .. "'")
+	 
+	function q:onSuccess(data)
+		if #data > 0 then
+			local row = data[1]
+		 
+			local points = row.points or 0
+			local items = util.JSONToTable(row.items or '{}')
  
-            callback(points, items)
-        else
-            callback(0, {})
-        end
-    end
-     
-    function q:onError(err, sql)
-        if db:status() ~= mysqloo.DATABASE_CONNECTED then
-            db:connect()
-            db:wait()
-        if db:status() ~= mysqloo.DATABASE_CONNECTED then
-            ErrorNoHalt("Re-connection to database server failed.")
-            callback(0, {})
-            return
-            end
-        end
-        MsgN('PointShop MySQL: Query Failed: ' .. err .. ' (' .. sql .. ')')
-        q:start()
-    end
-     
-    q:start()
+			callback(points, items)
+		else
+			callback(0, {})
+		end
+	end
+	 
+	function q:onError(err, sql)
+		ConnectMySQL()
+		q:start()
+	end
+	 
+	q:start()
 end
  
 function PROVIDER:SetData(ply, points, items)
-    if not shouldmysql then self:GetFallback():SetData(ply, points, items) end
-    local q = db:query("INSERT INTO `pointshop_data` (uniqueid, points, items) VALUES ('" .. ply:UniqueID() .. "', '" .. (points or 0) .. "', '" .. util.TableToJSON(items or {}) .. "') ON DUPLICATE KEY UPDATE points = VALUES(points), items = VALUES(items)")
-     
-    function q:onError(err, sql)
-        if db:status() ~= mysqloo.DATABASE_CONNECTED then
-            db:connect()
-            db:wait()
-        if db:status() ~= mysqloo.DATABASE_CONNECTED then
-            ErrorNoHalt("Re-connection to database server failed.")
-            return
-            end
-        end
-        MsgN('PointShop MySQL: Query Failed: ' .. err .. ' (' .. sql .. ')')
-        q:start()
-    end
-     
-    q:start()
+	if not shouldmysql then self:GetFallback():SetData(ply, points, items) end
+	
+	local q = db:query("INSERT INTO `pointshop_data` (uniqueid, points, items) VALUES ('" .. ply:UniqueID() .. "', '" .. (points or 0) .. "', '" .. util.TableToJSON(items or {}) .. "') ON DUPLICATE KEY UPDATE points = VALUES(points), items = VALUES(items)")
+	 
+	function q:onError(err, sql)
+		ConnectMySQL()
+		q:start()
+	end
+	 
+	q:start()
 end
+
+-- command to send all server sqlite data to mysql
+-- run from the server console once mysql is setup and working
+
+concommand.Add('ps_mysql_migrate', function(ply, cmd, args)
+	if not shouldmysql then return end
+	if IsValid(ply) then return end
+	
+	local playerdata = []
+	
+	local data = sql.Query("SELECT * FROM playerpdata")
+	
+	for _, row in pairs(data) do
+		local parts = string.Explode("[", row.infoid)
+		local uniqueid = tostring(parts[1])
+		local key = string.sub(parts[2], 0, -2)
+		
+		if not playerdata[uniqueid] then
+			playerdata[uniqueid] = []
+		end
+		
+		if key == 'PS_Points' then
+			playerdata[uniqueid].points = row.value
+		end
+		
+		if key == 'PS_Items' then
+			playerdata[uniqueid].items = row.value
+		end
+	end
+	
+	for uniqueid, data in pairs(playerdata) do
+		if data.points and data.items then
+			local q = db:query("INSERT INTO `pointshop_data` (uniqueid, points, items) VALUES ('" .. uniqueid .. "', '" .. (data.points or 0) .. "', '" .. util.TableToJSON(data.items or {}) .. "') ON DUPLICATE KEY UPDATE points = VALUES(points), items = VALUES(items)")
+			
+			function q:onError(err, sql)
+				ConnectMySQL()
+				q:start()
+			end
+			
+			q:start()
+		end
+	end
+end)
