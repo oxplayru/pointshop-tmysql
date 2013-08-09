@@ -88,7 +88,7 @@ end
  
 function PROVIDER:SetData(ply, points, items)
     if not shouldmysql then self:GetFallback():SetData(ply, points, items) end
-    local q = db:query("INSERT INTO `pointshop_data` (uniqueid, points, items) VALUES ('" .. ply:UniqueID() .. "', '" .. (points or 0) .. "', '" .. util.TableToJSON(items or {}) .. "') ON DUPLICATE KEY UPDATE points = VALUES(points), items = VALUES(items)")
+    local q = db:query("INSERT INTO `pointshop_data` (uniqueid, points, items) VALUES ('" .. ply:UniqueID() .. "', '" .. (points or 0) .. "', '" .. db:escape(util.TableToJSON(items or {})) .. "') ON DUPLICATE KEY UPDATE points = VALUES(points), items = VALUES(items)")
      
     function q:onError(err, sql)
         if db:status() ~= mysqloo.DATABASE_CONNECTED then
