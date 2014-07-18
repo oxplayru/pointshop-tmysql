@@ -23,7 +23,7 @@ local mysql_port = 3306 -- Your MySQL port. Most likely is 3306.
 
 require('tmysql4')
 
-PROVDER.Fallback = "pdata"
+PROVIDER.Fallback = "pdata"
 
 local db, err = tmysql.initialize(mysql_hostname, mysql_username, mysql_password, mysql_database, mysql_port)
 
