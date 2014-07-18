@@ -95,10 +95,7 @@ else
 
         db:Query(qs, function(res, pass, err)
             if (not pass) then ErrorNoHalt("[PSMySQL-SetData] "..err) return end
-            if (#res < 1) then callback(0, {}) return end
-            local row = res[1]
             print("[PSMySQL-SetData] "..ply:UniqueID())
-            callback(row.points or 0, util.JSONToTable(row.items or '{}'))
         end, QUERY_FLAG_ASSOC)
     end
 end
