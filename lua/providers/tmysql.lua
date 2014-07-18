@@ -5,6 +5,8 @@
 
     Adapted from _Undefined's pointshop-mysql
     
+    Once configured, change PS.Config.DataProvider = 'pdata' to PS.Config.DataProvider = 'tmysql' in pointshop's sh_config.lua.
+    
 ]]--
 
 -- config, change these to match your setup
