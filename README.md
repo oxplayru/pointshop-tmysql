@@ -5,6 +5,8 @@ MySQL adapter for PointShop that uses [tmysql4](https://code.google.com/p/blacka
 
 Install this folder as a separate addon. (Place entire `pointshop-tmysql` folder in `garrysmod/addons`)
 
+MySQL providers for pointshop are useful if you want to share data across multiple servers, or store it for access from different applications such as a website or donation system.
+
 tMySQL4 Installation
 ================
 
