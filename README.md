@@ -10,10 +10,8 @@ MySQL providers for pointshop are useful if you want to share data across multip
 tMySQL4 Installation
 ================
 
-Get tmysql4 from [Blackawps's Google Code](https://code.google.com/p/blackawps-glua-modules/source/browse/#hg%2Fgm_tmysql4_boost%2FRelease)
-It's Windows AND Linux compatible! Make sure you install the correct libraries.
-
-You must place the libraries in `libs.rar` ([link](https://blackawps-glua-modules.googlecode.com/hg/gm_tmysql4_boost/Release/libs.rar)) next to your SRCDS executable located in the same folder the `garrysmod` folder is within your server installation folder.
+Get tmysql4 from [Blackawps's Google Code](https://github.com/blackawps/gm_tmysql4/releases)
+It's Windows AND Linux compatible!
 
 You must also place either gm_tmysql4_win32.dll or gmsv_tmysql4_linux.dll in your `garrysmod/lua/bin` folder depending on your server's operating system. Obviously, `win32` for Windows and `linux` for linux operating systems.
 
