@@ -1,7 +1,7 @@
 pointshop-tmysql
 ================
 
-MySQL adapter for PointShop that uses [tmysql4](https://code.google.com/p/blackawps-glua-modules/source/browse/#hg%2Fgm_tmysql4_boost%2FRelease) by Blackawps.
+MySQL adapter for PointShop that uses [tmysql4](https://github.com/blackawps/gm_tmysql4/releases) by Blackawps.
 
 Install this folder as a separate addon. (Place entire `pointshop-tmysql` folder in `garrysmod/addons`)
 
